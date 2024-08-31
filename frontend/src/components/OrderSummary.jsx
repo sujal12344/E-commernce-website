@@ -1,14 +1,14 @@
+import React from "react";
 import { motion } from "framer-motion";
 import { useCartStore } from "../stores/useCartStore";
 import { Link } from "react-router-dom";
 import { MoveRight } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import axios from "../lib/axios";
-import dotenv from "dotenv";
 
-dotenv.config();
-
-const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
+const stripePromise = loadStripe(
+  "pk_test_51PogFPJ1Ka6GJOBzsOx4GztdO968NrL7QSUT07LmumTXwA9ZiR8nPfJEgMJHjqWPqFVi9vPxR9x9ZnyYQYUnTvFt0067mS7gul"
+);
 
 const OrderSummary = () => {
   const { total, subtotal, coupon, isCouponApplied, cart } = useCartStore();
@@ -19,19 +19,29 @@ const OrderSummary = () => {
   const formattedSavings = savings.toFixed(2);
 
   const handlePayment = async () => {
-    const stripe = await stripePromise;
-    const res = await axios.post("/payments/create-checkout-session", {
-      products: cart,
-      couponCode: coupon ? coupon.code : null,
-    });
+    try {
+      const stripe = await stripePromise;
+      const res = await axios.post("/payments/create-checkout-session", {
+        products: cart,
+        couponCode: coupon ? coupon.code : null,
+      });
 
-    const session = res.data;
-    const result = await stripe.redirectToCheckout({
-      sessionId: session.id,
-    });
+      if (res.status !== 200) {
+        throw new Error("Failed to create checkout session");
+      }
 
-    if (result.error) {
-      console.error("Error:", result.error);
+      const session = res.data;
+      const result = await stripe.redirectToCheckout({
+        sessionId: session.id,
+      });
+
+      if (result.error) {
+        console.error("Stripe redirect error:", result.error.message);
+        alert("Something went wrong. Please try again later.");
+      }
+    } catch (error) {
+      console.error("Payment error:", error.message);
+      alert("Something went wrong. Please try again later.");
     }
   };
 
@@ -105,4 +115,5 @@ const OrderSummary = () => {
     </motion.div>
   );
 };
+
 export default OrderSummary;
