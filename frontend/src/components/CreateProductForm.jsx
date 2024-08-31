@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { PlusCircle, Upload, Loader } from "lucide-react";
+import { useDropzone } from "react-dropzone";
 import { useProductStore } from "../stores/useProductStore";
 
 const categories = [
@@ -21,6 +22,7 @@ const CreateProductForm = () => {
     category: "",
     image: "",
   });
+  const [imageUrl, setImageUrl] = useState("");
 
   const { createProduct, loading } = useProductStore();
 
@@ -53,6 +55,29 @@ const CreateProductForm = () => {
     }
   };
 
+  const handleImageUrlChange = (e) => {
+    setImageUrl(e.target.value);
+  };
+
+  const handleImageUrlSubmit = () => {
+    if (imageUrl) {
+      setNewProduct({ ...newProduct, image: imageUrl });
+      setImageUrl("");
+    }
+  };
+
+  const onDrop = useCallback(
+    (acceptedFiles) => {
+      handleImageChange({ target: { files: acceptedFiles } });
+    },
+    [handleImageChange]
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: "image/*",
+  });
+
   return (
     <motion.div
       className="bg-gray-800 shadow-lg rounded-lg p-8 mb-8 max-w-xl mx-auto"
@@ -80,9 +105,7 @@ const CreateProductForm = () => {
             onChange={(e) =>
               setNewProduct({ ...newProduct, name: e.target.value })
             }
-            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2
-						 px-3 text-white focus:outline-none focus:ring-2
-						focus:ring-emerald-500 focus:border-emerald-500"
+            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             required
           />
         </div>
@@ -102,9 +125,7 @@ const CreateProductForm = () => {
               setNewProduct({ ...newProduct, description: e.target.value })
             }
             rows="3"
-            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm
-						 py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 
-						 focus:border-emerald-500"
+            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             required
           />
         </div>
@@ -125,9 +146,7 @@ const CreateProductForm = () => {
               setNewProduct({ ...newProduct, price: e.target.value })
             }
             step="0.01"
-            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm 
-						py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500
-						 focus:border-emerald-500"
+            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             required
           />
         </div>
@@ -146,9 +165,7 @@ const CreateProductForm = () => {
             onChange={(e) =>
               setNewProduct({ ...newProduct, category: e.target.value })
             }
-            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md
-						 shadow-sm py-2 px-3 text-white focus:outline-none 
-						 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             required
           >
             <option value="">Select a category</option>
@@ -160,31 +177,47 @@ const CreateProductForm = () => {
           </select>
         </div>
 
-        <div className="mt-1 flex items-center">
-          <input
-            type="file"
-            id="image"
-            className="sr-only"
-            accept="image/*"
-            onChange={handleImageChange}
-          />
-          <label
-            htmlFor="image"
-            className="cursor-pointer bg-gray-700 py-2 px-3 border border-gray-600 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+        <div className="mt-1 flex flex-col items-center space-y-4">
+          <div
+            {...getRootProps()}
+            className={`cursor-pointer bg-gray-700 py-2 px-3 border border-gray-600 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 ${
+              isDragActive ? "bg-gray-600" : ""
+            }`}
           >
+            <input
+              {...getInputProps()}
+              id="image"
+              className="sr-only"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
             <Upload className="h-5 w-5 inline-block mr-2" />
-            Upload Image
-          </label>
+            {isDragActive ? "Drop the files here ..." : "Upload Image"}
+          </div>
           {newProduct.image && (
-            <span className="ml-3 text-sm text-gray-400">Image uploaded </span>
+            <span className="ml-3 text-sm text-gray-400">Image uploaded</span>
           )}
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              value={imageUrl}
+              onChange={handleImageUrlChange}
+              placeholder="Paste image URL"
+              className="bg-gray-700 py-2 px-3 border border-gray-600 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+            />
+            <button
+              type="button"
+              onClick={handleImageUrlSubmit}
+              className="bg-emerald-600 py-2 px-3 border border-emerald-500 rounded-md shadow-sm text-sm leading-4 font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+            >
+              Submit
+            </button>
+          </div>
         </div>
 
         <button
           type="submit"
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md 
-					shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 
-					focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50"
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50"
           disabled={loading}
         >
           {loading ? (
