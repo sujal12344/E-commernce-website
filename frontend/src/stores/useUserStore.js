@@ -23,6 +23,7 @@ export const useUserStore = create((set, get) => ({
       toast.error(error.response.data.message || "An error occurred");
     }
   },
+
   login: async (email, password) => {
     set({ loading: true });
 
@@ -32,6 +33,7 @@ export const useUserStore = create((set, get) => ({
       set({ user: res.data, loading: false });
     } catch (error) {
       set({ loading: false });
+      console.log(error?.response?.data);
       toast.error(error.response.data.message || "An error occurred");
     }
   },
