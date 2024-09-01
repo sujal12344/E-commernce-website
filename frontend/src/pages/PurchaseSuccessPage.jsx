@@ -69,7 +69,8 @@ const PurchaseSuccessPage = () => {
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-400">Order number</span>
               <span className="text-sm font-semibold text-emerald-400">
-                #12345
+                {"ORD_ID-" +
+                  Math.random().toString(36).substring(2, 9).toUpperCase()}
               </span>
             </div>
             <div className="flex items-center justify-between">
