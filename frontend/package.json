@@ -20,7 +20,7 @@
 		"react-dom": "^18.3.1",
 		"react-dropzone": "^14.2.3",
 		"react-hot-toast": "^2.4.1",
-		"react-router-dom": "^6.26.1",
+		"react-router-dom": "^6.30.3",
 		"recharts": "^2.12.7",
 		"zustand": "^4.5.5",
 		"vite": "^5.4.2",
